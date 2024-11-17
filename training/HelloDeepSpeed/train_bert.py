@@ -78,10 +78,10 @@ def masking_function(
             The tokenizer for tokenization
         mask_prob (float):
             What fraction of tokens to mask
-        random_replace_prob (float):
+        random_replace_prob (float): # 随机替换
             Of the masked tokens, how many should be replaced with
             random tokens (improves performance)
-        unmask_replace_prob (float):
+        unmask_replace_prob (float): # 根本不处理
             Of the masked tokens, how many should be replaced with
             the original token (improves performance)
         max_length (int):
@@ -101,7 +101,8 @@ def masking_function(
                                       add_special_tokens=False,
                                       truncation=True,
                                       max_length=max_length - 2) +
-                     [tokenizer.eos_token_id])
+                     [tokenizer.eos_token_id])  # tokenized_ids在raw_text转id同时首位拼上 开始结束 特殊字符<s> </s>
+
     seq_len = len(tokenized_ids)
     tokenized_ids = np.array(tokenized_ids)
     subword_mask = np.full(len(tokenized_ids), False)
@@ -117,8 +118,8 @@ def masking_function(
                                   replace=False)] = True
 
     # Create the labels first
-    labels = np.full(seq_len, tokenizer.pad_token_id)
-    labels[subword_mask] = tokenized_ids[subword_mask]
+    labels = np.full(seq_len, tokenizer.pad_token_id) # labels默认是pad符号
+    labels[subword_mask] = tokenized_ids[subword_mask] # 取mask前token_id作为监督label
 
     tokenized_ids[subword_mask] = tokenizer.mask_token_id
 
